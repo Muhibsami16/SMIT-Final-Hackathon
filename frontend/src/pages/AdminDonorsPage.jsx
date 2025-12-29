@@ -68,15 +68,12 @@ const AdminDonorsPage = () => {
                             <div className="pt-6 mt-6 border-t border-gray-100 flex items-center justify-between">
                                 <div className="text-center">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Donations</p>
-                                    <p className="text-xl font-black text-gray-900">0</p>
+                                    <p className="text-xl font-black text-gray-900">{user.totalDonations || 0}</p>
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total</p>
-                                    <p className="text-xl font-black text-gray-900">PKR 0</p>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Verified</p>
+                                    <p className="text-xl font-black text-gray-900">PKR {user.verifiedAmount?.toLocaleString() || 0}</p>
                                 </div>
-                                <button className="px-4 py-2 bg-gray-50 hover:bg-emerald-50 text-gray-600 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all">
-                                    View
-                                </button>
                             </div>
                         </div>
                     ))}

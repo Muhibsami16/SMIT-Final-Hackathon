@@ -1,10 +1,37 @@
 import { useSelector } from 'react-redux';
 import { useGetMyDonationsQuery } from '../store/slices/donationsApiSlice';
-import { Wallet, Clock, CheckCircle2 } from 'lucide-react';
+import { Wallet, Clock, CheckCircle2, Download } from 'lucide-react';
 
 const DashboardPage = () => {
     const { userInfo } = useSelector((state) => state.auth);
     const { data: donations, isLoading } = useGetMyDonationsQuery();
+
+    const handleDownloadReceipt = async (donationId) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/receipts/${donationId}/download`, {
+                headers: {
+                    'Authorization': `Bearer ${userInfo.token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to download receipt');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `receipt-${donationId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading receipt:', error);
+            alert('Failed to download receipt. Please try again.');
+        }
+    };
 
     const totalDonated = donations?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
     const verifiedCount = donations?.filter(d => d.status === 'Verified').length || 0;
@@ -92,7 +119,11 @@ const DashboardPage = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             {d.status === 'Verified' && (
-                                                <button className="text-emerald-600 hover:text-emerald-700 text-sm font-bold underline">
+                                                <button
+                                                    onClick={() => handleDownloadReceipt(d._id)}
+                                                    className="text-emerald-600 hover:text-emerald-700 text-sm font-bold underline flex items-center gap-1 ml-auto"
+                                                >
+                                                    <Download className="w-4 h-4" />
                                                     Download
                                                 </button>
                                             )}

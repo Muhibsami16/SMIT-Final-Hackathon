@@ -86,26 +86,78 @@ export const getUserProfile = async (req, res) => {
     }
 };
 
-// @desc    Get all users (admin)
+// @desc    Get all users with donation statistics (admin)
 // @route   GET /api/auth/users
 // @access  Private/Admin
 export const getUsers = async (req, res) => {
-    const keyword = req.query.keyword
-        ? {
-            $or: [
-                { name: { $regex: req.query.keyword, $options: 'i' } },
-                { email: { $regex: req.query.keyword, $options: 'i' } },
-            ],
-        }
-        : {};
+    const keyword = req.query.keyword || '';
 
     try {
-        console.log('Fetching users with keyword:', keyword);
-        const users = await User.find(keyword).select('-password');
-        console.log(`Found ${users.length} users`);
+        console.log('Fetching users with statistics. Keyword:', keyword);
+
+        const users = await User.aggregate([
+            // 1. Filter by keyword if provided
+            {
+                $match: {
+                    $or: [
+                        { name: { $regex: keyword, $options: 'i' } },
+                        { email: { $regex: keyword, $options: 'i' } },
+                    ]
+                }
+            },
+            // 2. Hide passwords
+            {
+                $project: {
+                    password: 0
+                }
+            },
+            // 3. Lookup donations for each user
+            {
+                $lookup: {
+                    from: 'donations',
+                    localField: '_id',
+                    foreignField: 'user',
+                    as: 'donations'
+                }
+            },
+            // 4. Calculate statistics
+            {
+                $addFields: {
+                    totalDonations: { $size: '$donations' },
+                    totalAmount: { $sum: '$donations.amount' },
+                    verifiedAmount: {
+                        $sum: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: '$donations',
+                                        as: 'd',
+                                        cond: { $eq: ['$$d.status', 'Verified'] }
+                                    }
+                                },
+                                as: 'vd',
+                                in: '$$vd.amount'
+                            }
+                        }
+                    }
+                }
+            },
+            // 5. Remove the detailed donations array to keep response small
+            {
+                $project: {
+                    donations: 0
+                }
+            },
+            // 6. Sort by newest users first
+            {
+                $sort: { createdAt: -1 }
+            }
+        ]);
+
+        console.log(`Found ${users.length} users with statistics`);
         res.json(users);
     } catch (error) {
-        console.error('Error in getUsers:', error);
+        console.error('Error in getUsers with statistics:', error);
         res.status(500).json({ message: error.message });
     }
 };

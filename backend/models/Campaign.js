@@ -7,7 +7,7 @@ const campaignSchema = new mongoose.Schema(
         goalAmount: { type: Number, required: true },
         collectedAmount: { type: Number, default: 0 },
         deadline: { type: Date, required: true },
-        status: { type: String, enum: ['Active', 'Ended'], default: 'Active' },
+        status: { type: String, enum: ['Active', 'Completed'], default: 'Active' },
     },
     { timestamps: true }
 );

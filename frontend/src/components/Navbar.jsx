@@ -27,7 +27,7 @@ const Navbar = () => {
                             <HeartHandshake className="h-6 w-6 text-white" />
                         </div>
                         <span className="font-black text-2xl tracking-tighter text-gray-900">
-                            Gravity
+                            Charity
                         </span>
                     </Link>
 

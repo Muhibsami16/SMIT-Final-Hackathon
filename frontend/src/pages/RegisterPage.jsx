@@ -49,7 +49,7 @@ const RegisterPage = () => {
             <div className="w-full max-w-md p-8 space-y-8 bg-white border border-gray-200 rounded-3xl shadow-xl">
                 <div className="text-center">
                     <h2 className="text-3xl font-black text-gray-900 tracking-tight">
-                        Join Gravity
+                        Join Charity
                     </h2>
                     <p className="mt-2 text-gray-500">
                         Start your journey of giving today
